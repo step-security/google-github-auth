@@ -1,0 +1,44 @@
+{
+  "name": "@step-security/auth",
+  "version": "2.1.6",
+  "description": "Authenticate to Google Cloud using OIDC tokens or JSON service account keys.",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "ncc build -m src/main.ts -o dist/main && ncc build -m src/post.ts -o dist/post",
+    "lint": "eslint .",
+    "format": "eslint . --fix",
+    "test": "bash ./bin/runTests.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/step-security/auth"
+  },
+  "keywords": [
+    "actions",
+    "google cloud",
+    "identity",
+    "auth",
+    "oidc"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/http-client": "^2.2.2",
+    "@google-github-actions/actions-utils": "^0.8.3",
+    "axios": "^1.7.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.9.0",
+    "@types/node": "^22.4.1",
+    "@vercel/ncc": "^0.38.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint": "^9.9.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript-eslint": "^8.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.2.0",
+    "typescript": "^5.5.4"
+  }
+}
