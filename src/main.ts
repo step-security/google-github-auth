@@ -347,7 +347,7 @@ export async function run(logger: Logger) {
     }
   } catch (err) {
     const msg = errorMessage(err);
-    setFailed(`step-security/auth failed with: ${msg}`);
+    setFailed(`step-security/google-github-auth failed with: ${msg}`);
   }
 }
 

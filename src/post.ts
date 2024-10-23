@@ -47,7 +47,7 @@ export async function run(logger: Logger) {
     logger.info(`Removed exported credentials at "${credentialsPath}".`);
   } catch (err) {
     const msg = errorMessage(err);
-    setFailed(`step-security/auth post failed with: ${msg}`);
+    setFailed(`step-security/google-github-auth post failed with: ${msg}`);
   }
 }
 
