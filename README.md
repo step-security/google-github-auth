@@ -1,18 +1,27 @@
 # Authenticate to Google Cloud from GitHub Actions
 
-This GitHub Action authenticates to Google Cloud. It supports authentication via
-a Google Cloud Service Account Key JSON and authentication via [Workload
+Forked from [google-github-actions/auth](https://github.com/google-github-actions/auth)
+
+### Changes from the Original Action
+1. Add the credentials file to `$GIT_DIR/info/exclude` (see [Git documentation](https://git-scm.com/docs/gitignore))  
+   This prevents accidental check-ins of sensitive information.
+
+2. Disable persistent credential support  
+   The original action supports both identity federation and persistent credentials. We've disabled persistent credentials for enhanced security.
+
+---
+
+This GitHub Action authenticates to Google Cloud. It supports authentication via [Workload
 Identity Federation][wif].
 
 Workload Identity Federation is recommended over Service Account Keys as it
 obviates the need to export a long-lived credential and establishes a trust
 delegation relationship between a particular GitHub Actions workflow invocation
-and permissions on Google Cloud. There are three ways to set up this GitHub
+and permissions on Google Cloud. There are two ways to set up this GitHub
 Action to authenticate to Google Cloud:
 
 1. [(Preferred) Direct Workload Identity Federation](#direct-wif)
 1. [Workload Identity Federation through a Service Account](#indirect-wif)
-1. [Service Account Key JSON](#sake)
 
 > [!IMPORTANT]
 > The `gsutil` command will **not** use the credentials exported by this GitHub
@@ -109,29 +118,6 @@ Identity Federation.
     generated GitHub Actions OIDC token. This value defaults to the value of
     `workload_identity_provider`, which is also the default value Google Cloud
     expects for the audience parameter on the token.
-
-### Inputs: Service Account Key JSON
-
-> [!CAUTION]
->
-> Service Account Key JSON credentials are long-lived credentials and must be
-> treated like a password.
-
-The following inputs are for _authenticating_ to Google Cloud via a Service
-Account Key JSON.
-
--   `credentials_json`: (Required) The Google Cloud Service Account Key JSON to
-    use for authentication.
-
-    We advise minifying your JSON into a single line string before storing it in
-    a GitHub Secret. When a GitHub Secret is used in a GitHub Actions workflow,
-    _each line_ of the secret is masked in log output. This can lead to
-    aggressive sanitization of benign characters like curly braces (`{}`) and
-    brackets (`[]`).
-
-    To generate access tokens or ID tokens using this service account, you must
-    grant the underlying service account `roles/iam.serviceAccountTokenCreator`
-    permissions on itself.
 
 ### Inputs: Generating OAuth 2.0 access tokens
 
@@ -332,6 +318,7 @@ This section describes the three configuration options:
 
 
 <a name="direct-wif" id="direct-wif"></a>
+
 ### (Preferred) Direct Workload Identity Federation
 
 In this setup, the Workload Identity Pool has direct IAM permissions on Google
@@ -472,6 +459,7 @@ These instructions use the [gcloud][gcloud] command-line tool.
 
 
 <a name="indirect-wif" id="indirect-wif"></a>
+
 ### Workload Identity Federation through a Service Account
 
 In this setup, the Workload Identity Pool impersonates a Google Cloud Service
@@ -607,61 +595,6 @@ These instructions use the [gcloud][gcloud] command-line tool.
       --project="${PROJECT_ID}" \
       --role="roles/secretmanager.secretAccessor" \
       --member="serviceAccount:my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
-    ```
-</details>
-
-
-<a name="sake" id="sake"></a>
-### Service Account Key JSON
-
-In this setup, a Service Account has direct IAM permissions on Google Cloud
-resources. You download a Service Account Key JSON file and upload it to GitHub
-as a secret.
-
-[![Authenticate to Google Cloud from GitHub Actions with a Service Account Key](docs/google-github-actions-auth-service-account-key-export.svg)](docs/google-github-actions-auth-service-account-key-export.svg)
-
-> [!CAUTION]
->
-> Google Cloud Service Account Key JSON files must be secured
-> and treated like a password. Anyone with access to the JSON key can
-> authenticate to Google Cloud as the underlying Service Account. By default,
-> these credentials never expire, which is why the former authentication options
-> are much preferred.
-
-<details>
-  <summary>Click here to show detailed instructions for configuring GitHub authentication to Google Cloud via a Service Account Key JSON.</summary>
-
-These instructions use the [gcloud][gcloud] command-line tool.
-
-1.  (Optional) Create a Google Cloud Service Account. If you already have a
-    Service Account, take note of the email address and skip this step.
-
-    ```sh
-    # TODO: replace ${PROJECT_ID} with your value below.
-
-    gcloud iam service-accounts create "my-service-account" \
-      --project "${PROJECT_ID}"
-    ```
-
-1.  Create a Service Account Key JSON for the Service Account.
-
-    ```sh
-    # TODO: replace ${PROJECT_ID} with your value below.
-
-    gcloud iam service-accounts keys create "key.json" \
-      --iam-account "my-service-account@${PROJECT_ID}.iam.gserviceaccount.com"
-    ```
-
-1.  Upload the contents of this file as a [GitHub Actions
-    Secret](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
-
-    Use the name of the GitHub Actions secret as the `credentials_json` value in
-    the GitHub Actions YAML:
-
-    ```yaml
-    - uses: 'step-security/auth@v2'
-      with:
-        credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}' # Replace with the name of your GitHub Actions secret
     ```
 </details>
 
