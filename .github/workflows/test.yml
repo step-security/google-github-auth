@@ -33,12 +33,20 @@ defaults:
   run:
     shell: 'bash'
 
+permissions:
+  contents: read
+
 jobs:
   unit:
     name: 'unit'
     runs-on: 'ubuntu-latest'
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: 'actions/checkout@v4'
 
       - uses: 'actions/setup-node@v4'
@@ -74,6 +82,11 @@ jobs:
       id-token: 'write'
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: 'actions/checkout@v4'
 
       - uses: 'actions/setup-node@v4'
@@ -114,6 +127,11 @@ jobs:
       id-token: 'write'
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - uses: 'actions/checkout@v4'
 
       - uses: 'actions/setup-node@v4'
