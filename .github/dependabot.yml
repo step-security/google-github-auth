@@ -22,3 +22,8 @@ updates:
     commit-message:
       prefix: 'security: '
     open-pull-requests-limit: 0 # only check security updates
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
