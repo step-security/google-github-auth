@@ -61,24 +61,24 @@ const oidcWarning =
   `GitHub Actions workflow permissions are incorrect, or this job is being ` +
   `run from a fork. For more information, please see https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token`;
 
-async function validateSubscription(): Promise<void> {
-  const API_URL = `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/subscription`;
-
-  try {
-    await axios.get(API_URL, { timeout: 3000 });
-  } catch (error) {
-    if (isAxiosError(error) && error.response) {
-      core.error('Subscription is not valid. Reach out to support@stepsecurity.io');
-      process.exit(1);
-    } else {
-      core.info('Timeout or API not reachable. Continuing to next step.');
+  async function validateSubscription(): Promise<void> {
+    const API_URL = `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/subscription`;
+  
+    try {
+      await axios.get(API_URL, { timeout: 3000 });
+    } catch (error) {
+      if (isAxiosError(error) && error.response) {
+        core.error('Subscription is not valid. Reach out to support@stepsecurity.io');
+        process.exit(1);
+      } else {
+        core.info('Timeout or API not reachable. Continuing to next step.');
+      }
     }
   }
-}
-
+  
 export async function run(logger: Logger) {
-  // check subscription
-  await validateSubscription();
+    // check subscription
+    await validateSubscription();
 
   // Warn if pinned to HEAD
   if (isPinnedToHead()) {
@@ -194,11 +194,6 @@ export async function run(logger: Logger) {
       const outputPath = pathjoin(githubWorkspace, outputFile);
       const credentialsPath = await client.createCredentialsFile(outputPath);
       logger.info(`Created credentials file at "${credentialsPath}"`);
-
-      // Compute the relative path
-      const relative_path = relative(process.cwd(), credentialsPath);
-      // Append the relative path to '.git/info/exclude'
-      appendFileSync('.git/info/exclude', `\n${relative_path}`);
 
       // Output to be available to future steps.
       setOutput('credentials_file_path', credentialsPath);
@@ -347,7 +342,7 @@ export async function run(logger: Logger) {
     }
   } catch (err) {
     const msg = errorMessage(err);
-    setFailed(`step-security/google-github-auth failed with: ${msg}`);
+    setFailed(`google-github-actions/auth failed with: ${msg}`);
   }
 }
 

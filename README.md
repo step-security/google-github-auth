@@ -11,7 +11,8 @@ Forked from [google-github-actions/auth](https://github.com/google-github-action
 
 ---
 
-This GitHub Action authenticates to Google Cloud. It supports authentication via [Workload
+This GitHub Action authenticates to Google Cloud. It supports 
+authentication via a Google Cloud Service Account Key JSON and authentication via [Workload
 Identity Federation][wif].
 
 Workload Identity Federation is recommended over Service Account Keys as it
@@ -44,7 +45,7 @@ support](https://cloud.google.com/support).**
     accidentally committing credentials to your release artifact:
 
     ```text
-    # Ignore generated credentials from step-security/google-github-auth
+    # Ignore generated credentials from step-security/auth
     gha-creds-*.json
     ```
 
@@ -66,7 +67,7 @@ jobs:
     steps:
     - uses: 'actions/checkout@v4'
 
-    - uses: 'step-security/google-github-auth@v2'
+    - uses: 'step-security/auth@v2'
       with:
         project_id: 'my-project'
         workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
@@ -226,7 +227,7 @@ regardless of the authentication mechanism.
       job_id:
         steps:
         - uses: 'actions/checkout@v4' # Must come first!
-        - uses: 'step-security/google-github-auth@v2'
+        - uses: 'step-security/auth@v2'
      ```
 
 -   `export_environment_variables`: (Optional) If true, the action will export
@@ -413,7 +414,7 @@ These instructions use the [gcloud][gcloud] command-line tool.
     Actions YAML:
 
     ```yaml
-    - uses: 'step-security/google-github-auth@v2'
+    - uses: 'step-security/auth@v2'
       with:
         project_id: 'my-project'
         workload_identity_provider: '...' # "projects/123456789/locations/global/workloadIdentityPools/github/providers/my-repo"
@@ -578,7 +579,7 @@ These instructions use the [gcloud][gcloud] command-line tool.
     Actions YAML:
 
     ```yaml
-    - uses: 'step-security/google-github-auth@v2'
+    - uses: 'step-security/auth@v2'
       with:
         service_account: '...' # my-service-account@my-project.iam.gserviceaccount.com
         workload_identity_provider: '...' # "projects/123456789/locations/global/workloadIdentityPools/github/providers/my-repo"

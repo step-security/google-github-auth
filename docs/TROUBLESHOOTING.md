@@ -29,7 +29,7 @@
     ```yaml
     steps:
       - uses: 'actions/checkout@v4'
-      - uses: 'step-security/google-github-auth@v2'
+      - uses: 'step-security/auth@v2'
     ```
 
 1.  Ensure the value for `workload_identity_provider` is the full _Provider_
@@ -156,7 +156,7 @@ ways to fix this issue:
 -   Add and commit the following lines to your `.gitignore`:
 
     ```text
-    # Ignore generated credentials from step-security/google-github-auth
+    # Ignore generated credentials from step-security/auth
     gha-creds-*.json
     ```
 
