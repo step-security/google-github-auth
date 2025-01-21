@@ -63,7 +63,7 @@ const oidcWarning =
 
 async function validateSubscription(): Promise<void> {
   const API_URL = `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/subscription`;
-  
+
   try {
     await axios.get(API_URL, { timeout: 3000 });
   } catch (error) {
@@ -75,7 +75,7 @@ async function validateSubscription(): Promise<void> {
     }
   }
 }
-  
+
 export async function run(logger: Logger) {
   // check subscription
   await validateSubscription();
@@ -199,7 +199,7 @@ export async function run(logger: Logger) {
       const relative_path = relative(process.cwd(), credentialsPath);
       // Append the relative path to '.git/info/exclude'
       appendFileSync('.git/info/exclude', `\n${relative_path}`);
-      
+
       // Output to be available to future steps.
       setOutput('credentials_file_path', credentialsPath);
 

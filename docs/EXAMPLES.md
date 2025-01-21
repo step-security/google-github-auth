@@ -136,7 +136,7 @@ jobs:
     - uses: 'actions/checkout@v4'
 
     - id: 'auth'
-      uses: 'google-github-actions/auth@v2'
+      uses: 'step-security/google-github-auth@v2'
       with:
         token_format: 'access_token' # <--
         workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
@@ -173,7 +173,7 @@ jobs:
     - uses: 'actions/checkout@v4'
 
     - id: 'auth'
-      uses: 'google-github-actions/auth@v2'
+      uses: 'step-security/google-github-auth@v2'
       with:
         token_format: 'id_token' # <--
         workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
