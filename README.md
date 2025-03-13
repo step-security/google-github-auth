@@ -58,6 +58,9 @@ support](https://cloud.google.com/support).**
 ```yaml
 jobs:
   job_id:
+    # Any runner supporting Node 20 or newer
+    runs-on: ubuntu-latest
+
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
