@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
         with:
           egress-policy: audit
 
@@ -83,7 +83,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
         with:
           egress-policy: audit
 
@@ -103,7 +103,7 @@ jobs:
           project_id: '${{ vars.PROJECT_ID }}'
           workload_identity_provider: '${{ vars.WIF_PROVIDER_NAME }}'
 
-      - uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: 'google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2'
         with:
           version: '>= 363.0.0'
 
@@ -128,7 +128,7 @@ jobs:
 
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
         with:
           egress-policy: audit
 
@@ -148,6 +148,6 @@ jobs:
           workload_identity_provider: '${{ vars.WIF_PROVIDER_NAME }}'
           service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
 
-      - uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: 'google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2.1.2'
         with:
           version: '>= 363.0.0'
