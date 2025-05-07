@@ -34,8 +34,7 @@ defaults:
     shell: 'bash'
 
 permissions:
-  contents: 'read'
-  statuses: 'write'
+  contents: read
 
 jobs:
   unit:
