@@ -10,6 +10,9 @@ on:
   schedule:
     - cron: "0 0 * * 1"
 
+  schedule:
+    - cron: "0 0 * * 1"
+
 permissions:
   contents: write
   pull-requests: write
@@ -18,7 +21,7 @@ permissions:
 
 jobs:
   audit-fix:
-    uses: step-security/reusable-workflows/.github/workflows/auto_cherry_pick.yaml@upstream-Changes-CherryPick
+    uses: step-security/reusable-workflows/.github/workflows/auto_cherry_pick.yaml@v1
     with:
       original-owner: "google-github-actions"
       repo-name: "auth"
