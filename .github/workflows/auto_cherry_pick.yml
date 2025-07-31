@@ -23,9 +23,10 @@ permissions:
 
 jobs:
   cherry-pick:
+    if: github.event_name == 'workflow_dispatch' || contains(fromJson(toJson(github.event.pull_request.labels)).*.name, 'review-required')
     uses: step-security/reusable-workflows/.github/workflows/auto_cherry_pick.yaml@feature/verify-cherry-pick
     with:
       original-owner: "google-github-actions"
       repo-name: "auth"
       base_branch: ${{ inputs.base_branch || 'main' }}
-      mode: ${{ github.event_name == 'pull_request' && contains(fromJson(toJson(github.event.pull_request.labels)).*.name, 'review-required') && 'verify' || (github.event_name == 'workflow_dispatch' && inputs.mode || '') }}
+      mode: ${{ github.event_name == 'pull_request' && 'verify' || inputs.mode }}
