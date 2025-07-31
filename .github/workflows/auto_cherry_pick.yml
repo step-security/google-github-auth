@@ -13,7 +13,7 @@ on:
         default: "cherry-pick"
 
   pull_request:
-    types: [labeled]
+    types: [labeled, opened, synchronize]
 
 permissions:
   contents: write
@@ -22,20 +22,10 @@ permissions:
   issues: write
 
 jobs:
-  check-label:
-    if: github.event_name == 'pull_request' && github.event.label.name == 'review-required'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set output for mode
-        id: mode
-        run: echo "mode=review-required" >> $GITHUB_OUTPUT
-
   cherry-pick:
-    needs: [check-label]
-    if: github.event_name == 'workflow_dispatch' || needs.check-label.result == 'success'
     uses: step-security/reusable-workflows/.github/workflows/auto_cherry_pick.yaml@feature/verify-cherry-pick
     with:
       original-owner: "google-github-actions"
       repo-name: "auth"
       base_branch: ${{ inputs.base_branch || 'main' }}
-      mode: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode || 'cherry-pick') || 'review-required' }}
+      mode: ${{ github.event_name == 'pull_request' && contains(fromJson(toJson(github.event.pull_request.labels)).*.name, 'review-required') && 'verify' || (github.event_name == 'workflow_dispatch' && inputs.mode || '') }}
