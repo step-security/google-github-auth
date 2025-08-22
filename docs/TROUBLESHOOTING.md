@@ -266,7 +266,7 @@ Alternatively, you can use the `token_format` parameter of this action to
 generate an ID token directly:
 
 ```yaml
-- uses: 'google-github-actions/auth@v2'
+- uses: 'step-security/google-github-auth@v2'
   with:
     workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
     service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
