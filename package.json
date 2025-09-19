@@ -1,17 +1,17 @@
 {
   "name": "@step-security/google-github-auth",
-  "version": "2.1.13",
+  "version": "3.0.0",
   "description": "Authenticate to Google Cloud using OIDC tokens or JSON service account keys.",
   "main": "dist/main/index.js",
   "scripts": {
     "build": "ncc build -m src/main.ts -o dist/main && ncc build -m src/post.ts -o dist/post",
     "lint": "eslint .",
     "format": "eslint . --fix",
-    "test": "bash ./bin/runTests.sh"
+    "test": "node --require ts-node/register --test-reporter spec --test tests/**/*.test.ts"
   },
   "engines": {
-    "node": ">= 20.x",
-    "npm": ">= 10.x"
+    "node": ">= 24.x",
+    "npm": ">= 11.x"
   },
   "repository": {
     "type": "git",
