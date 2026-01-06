@@ -201,11 +201,6 @@ export async function run(logger: Logger) {
       const credentialsPath = await client.createCredentialsFile(outputPath);
       logger.info(`Created credentials file at "${credentialsPath}"`);
 
-      // Compute the relative path
-      const relative_path = relative(process.cwd(), credentialsPath);
-      // Append the relative path to '.git/info/exclude'
-      appendFileSync('.git/info/exclude', `\n${relative_path}`);
-
       // Output to be available to future steps.
       setOutput('credentials_file_path', credentialsPath);
 
