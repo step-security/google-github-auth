@@ -46,8 +46,8 @@ import {
   computeServiceAccountEmail,
   generateCredentialsFilename,
 } from './utils';
-import { appendFileSync } from 'fs';
-import { relative } from 'path';
+import { appendFileSync, existsSync } from 'fs';
+import { relative, join } from 'path';
 import * as core from '@actions/core';
 import axios, { isAxiosError } from 'axios';
 
@@ -203,8 +203,14 @@ export async function run(logger: Logger) {
 
       // Compute the relative path
       const relative_path = relative(process.cwd(), credentialsPath);
-      // Append the relative path to '.git/info/exclude'
-      appendFileSync('.git/info/exclude', `\n${relative_path}`);
+
+      // Append the relative path to '.git/info/exclude' if exclude file exists
+      const excludePath = join('.git', 'info', 'exclude');
+      if (existsSync(excludePath)) {
+        appendFileSync(excludePath, `\n${relative_path}`);
+      } else {
+        logger.debug('Skipping .git/info/exclude update - exclude file not found');
+      }
 
       // Output to be available to future steps.
       setOutput('credentials_file_path', credentialsPath);
