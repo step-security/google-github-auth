@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "alwaysStrict": true,
-    "target": "es6",
+    "target": "es2023",
     "module": "commonjs",
-    "lib": ["es6"],
+    "lib": ["es2023"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,

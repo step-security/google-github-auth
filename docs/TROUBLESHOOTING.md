@@ -6,9 +6,7 @@
     see exactly which step is failing. Ensure you are using the latest version
     of the GitHub Action.
 
-    > [!CAUTION]
-    >
-    > Enabling debug logging increases the chances of a secret
+    > **⚠️ WARNING!** Enabling debug logging increases the chances of a secret
     > being accidentally logged. While GitHub Actions will scrub secrets,
     > please take extra caution when sharing these debug logs in publicly
     > accessible places like GitHub issues.
@@ -46,7 +44,7 @@
 
     ```diff
     - projects/my-project/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-    + projects/1234567890/locations/global/workloadIdentityPools/my-pool/providers/
+    + projects/1234567890/locations/global/workloadIdentityPools/my-pool/providers/my-provider
     ```
 
 1.  Ensure that you have the correct `permissions:` for the job in your
@@ -64,11 +62,9 @@
     GitHub OIDC token. You cannot grant permissions on an attribute unless you
     map that value from the incoming GitHub OIDC token.
 
-    > [!TIP]
-    >
-    > Use the [GitHub Actions OIDC Debugger][oidc-debugger] to print the list of
-    > token claims and compare them to your Attribute Mappings and Attribute
-    > Conditions.
+    > **ℹ️ TIP!** Use the [GitHub Actions OIDC Debugger][oidc-debugger] to print
+    > the list of token claims and compare them to your Attribute Mappings and
+    > Attribute Conditions.
 
 1.  Ensure you have the correct character casing and capitalization. GitHub does
     not distinguish between "foobar" and "FooBar", but Google Cloud does. Ensure
@@ -89,10 +85,8 @@
 1.  Enable `Admin Read`, `Data Read`, and `Data Write` [Audit Logging][cal] for
     Identity and Access Management (IAM) in your Google Cloud project.
 
-    > [!WARNING]
-    >
-    > This will increase log volume which may increase costs. You can disable
-    > this audit logging after you have debugged the issue.
+    > **⚠️ WARNING!** This will increase log volume which may increase costs.
+    > You can disable this audit logging after you have debugged the issue.
 
     Try to authenticate again, and then explore the logs for your Workload
     Identity Provider and Workload Identity Pool. Sometimes these error messages
@@ -236,11 +230,56 @@ tool like `jq`:
 cat credentials.json | jq -r tostring
 ```
 
+<a name="cannot-refresh"></a>
+
+## Cannot refresh credentials to retrieve an ID token
+
+If you get an error like:
+
+```text
+google.auth.exceptions.RefreshError: ('Unable to acquire impersonated credentials', '{"error": {"code": 400, "message": "Request contains an invalid argument.", "status": "INVALID_ARGUMENT"}}')
+```
+
+when trying to refresh credentials in Python code to get an ID token, this is
+usually because the credentials are missing required scopes. The Google Auth
+library requires scopes to be set when refreshing credentials for impersonation.
+
+To fix this issue, add the required scopes before refreshing:
+
+```python
+from google.auth import default
+from google.auth.transport.requests import Request
+
+credentials, project = default()
+
+# Add scopes before refreshing
+credentials = credentials.with_scopes(
+    ["https://www.googleapis.com/auth/cloud-platform"]
+)
+credentials.refresh(request=Request())
+
+# Now you can access the ID token
+print(credentials.id_token)
+```
+
+Alternatively, you can use the `token_format` parameter of this action to
+generate an ID token directly:
+
+```yaml
+- uses: 'step-security/google-github-auth@v2'
+  with:
+    workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+    service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+    token_format: 'id_token'
+    id_token_audience: 'https://example.com'
+```
+
+This will export the ID token as an environment variable that you can use in
+your Python code.
+
 ## Organizational Policy Constraints
 
-> [!NOTE]
->
-> Your Google Cloud organization administrator controls these
+> **ℹ️ NOTE!** Your Google Cloud organization administrator controls these
 > policies. You must work with your internal IT department to resolve OrgPolicy
 > violations and constraints.
 

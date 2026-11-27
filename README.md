@@ -1,3 +1,5 @@
+[![StepSecurity Maintained Action](https://raw.githubusercontent.com/step-security/maintained-actions-assets/main/assets/maintained-action-banner.png)](https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions)
+
 # Authenticate to Google Cloud from GitHub Actions
 
 Forked from [google-github-actions/auth](https://github.com/google-github-actions/auth)
@@ -58,6 +60,9 @@ support](https://cloud.google.com/support).**
 ```yaml
 jobs:
   job_id:
+    # Any runner supporting Node 20 or newer
+    runs-on: ubuntu-latest
+
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -89,6 +94,12 @@ For more usage options, see the [examples](docs/EXAMPLES.md).
 > This option is [not supported by Firebase Admin
 > SDK](https://github.com/firebase/firebase-admin-node/issues/1377). Use Service
 > Account Key JSON authentication instead.
+
+> [!WARNING]
+>
+> As of the time of this writing, the GitHub OIDC token expires in 5 minutes,
+> which means any derived credentials also expire in 5 minutes.
+
 
 The following inputs are for _authenticating_ to Google Cloud via Workload
 Identity Federation.
@@ -297,7 +308,6 @@ regardless of the authentication mechanism.
 
 -   `id_token`: The Google Cloud ID token. This is only available when
     "token_format" is "id_token".
-
 
 
 <a id="setup"></a>

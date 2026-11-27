@@ -16,7 +16,6 @@ import { join as pathjoin } from 'path';
 
 import {
   exportVariable,
-  getBooleanInput,
   getIDToken,
   getInput,
   setFailed,
@@ -29,8 +28,10 @@ import {
   isEmptyDir,
   isPinnedToHead,
   parseMultilineCSV,
+  parseBoolean,
   parseDuration,
   pinnedToHeadWarning,
+  withRetries,
 } from '@google-github-actions/actions-utils';
 
 import {
@@ -45,8 +46,9 @@ import {
   computeServiceAccountEmail,
   generateCredentialsFilename,
 } from './utils';
-import { appendFileSync } from 'fs';
-import { relative } from 'path';
+import * as fs from 'fs';
+import { appendFileSync, existsSync } from 'fs';
+import { relative, join } from 'path';
 import * as core from '@actions/core';
 import axios, { isAxiosError } from 'axios';
 
@@ -62,17 +64,45 @@ const oidcWarning =
   `run from a fork. For more information, please see https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token`;
 
 async function validateSubscription(): Promise<void> {
-  const API_URL = `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/subscription`;
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  let repoPrivate: boolean | undefined;
 
+  if (eventPath && fs.existsSync(eventPath)) {
+    const eventData = JSON.parse(fs.readFileSync(eventPath, 'utf8'));
+    repoPrivate = eventData?.repository?.private;
+  }
+
+  const upstream = 'google-github-actions/auth';
+  const action = process.env.GITHUB_ACTION_REPOSITORY;
+  const docsUrl = 'https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions';
+
+  core.info('');
+  core.info('\u001b[1;36mStepSecurity Maintained Action\u001b[0m');
+  core.info(`Secure drop-in replacement for ${upstream}`);
+  if (repoPrivate === false) core.info('\u001b[32m\u2713 Free for public repositories\u001b[0m');
+  core.info(`\u001b[36mLearn more:\u001b[0m ${docsUrl}`);
+  core.info('');
+
+  if (repoPrivate === false) return;
+
+  const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+  const body: Record<string, string> = { action: action || '' };
+  if (serverUrl !== 'https://github.com') body.ghes_server = serverUrl;
   try {
-    await axios.get(API_URL, { timeout: 3000 });
+    await axios.post(
+      `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/maintained-actions-subscription`,
+      body,
+      { timeout: 3000 },
+    );
   } catch (error) {
-    if (isAxiosError(error) && error.response) {
-      core.error('Subscription is not valid. Reach out to support@stepsecurity.io');
+    if (isAxiosError(error) && error.response?.status === 403) {
+      core.error(
+        `\u001b[1;31mThis action requires a StepSecurity subscription for private repositories.\u001b[0m`,
+      );
+      core.error(`\u001b[31mLearn how to enable a subscription: ${docsUrl}\u001b[0m`);
       process.exit(1);
-    } else {
-      core.info('Timeout or API not reachable. Continuing to next step.');
     }
+    core.info('Timeout or API not reachable. Continuing to next step.');
   }
 }
 
@@ -100,8 +130,8 @@ export async function run(logger: Logger) {
     const oidcTokenAudience =
       getInput(`audience`) || `https://iam.googleapis.com/${workloadIdentityProvider}`;
     const credentialsJSON = getInput(`credentials_json`);
-    const createCredentialsFile = getBooleanInput(`create_credentials_file`);
-    const exportEnvironmentVariables = getBooleanInput(`export_environment_variables`);
+    const createCredentialsFile = parseBoolean(getInput(`create_credentials_file`));
+    const exportEnvironmentVariables = parseBoolean(getInput(`export_environment_variables`));
     const tokenFormat = getInput(`token_format`);
     const delegates = parseMultilineCSV(getInput(`delegates`));
     const universe = getInput(`universe`);
@@ -131,7 +161,12 @@ export async function run(logger: Logger) {
         throw new Error(oidcWarning);
       }
 
-      const oidcToken = await getIDToken(oidcTokenAudience);
+      const oidcToken = await withRetries(
+        async (): Promise<string> => {
+          return await getIDToken(oidcTokenAudience);
+        },
+        { retries: 3 },
+      )();
       client = new WorkloadIdentityFederationClient({
         logger: logger,
         universe: universe,
@@ -197,8 +232,14 @@ export async function run(logger: Logger) {
 
       // Compute the relative path
       const relative_path = relative(process.cwd(), credentialsPath);
-      // Append the relative path to '.git/info/exclude'
-      appendFileSync('.git/info/exclude', `\n${relative_path}`);
+
+      // Append the relative path to '.git/info/exclude' if exclude file exists
+      const excludePath = join('.git', 'info', 'exclude');
+      if (existsSync(excludePath)) {
+        appendFileSync(excludePath, `\n${relative_path}`);
+      } else {
+        logger.debug('Skipping .git/info/exclude update - exclude file not found');
+      }
 
       // Output to be available to future steps.
       setOutput('credentials_file_path', credentialsPath);
@@ -320,7 +361,7 @@ export async function run(logger: Logger) {
         logger.debug(`Creating id token`);
 
         const idTokenAudience = getInput('id_token_audience', { required: true });
-        const idTokenIncludeEmail = getBooleanInput('id_token_include_email');
+        const idTokenIncludeEmail = parseBoolean(getInput('id_token_include_email'));
 
         // Ensure a service_account was provided if using WIF.
         if (!serviceAccount) {
